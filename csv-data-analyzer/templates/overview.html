@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Overview - CSV Data Analyzer{% endblock %}
+{% block header_title %}Overview{% endblock %}
+
+{% block content %}
+
+{% if not dataset %}
+  {% include "_upload_empty.html" %}
+{% else %}
+
+  <div class="grid grid-upload-overview">
+    <div class="card">
+      <div class="card-title">Upload CSV File</div>
+      <form id="upload-form" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <div class="upload-dropzone" id="dropzone">
+          <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+          <p><strong>Drag &amp; Drop</strong> your CSV file here</p>
+          <p>or</p>
+          <input type="file" name="csv_file" id="csv_file_input" accept=".csv" hidden>
+          <button type="button" class="upload-choose-btn" onclick="document.getElementById('csv_file_input').click();">
+            Choose CSV File
+          </button>
+          <p id="chosen-file-name" style="margin-top:10px;font-size:11.5px;"></p>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Dataset Overview</div>
+      <div class="grid grid-5">
+        <div class="stat-card">
+          <div class="stat-label">Total Rows</div>
+          <div class="stat-value blue">{{ "{:,}".format(overview.total_rows) }}</div>
+          <div class="stat-sub">Records in dataset</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Columns</div>
+          <div class="stat-value green">{{ overview.total_columns }}</div>
+          <div class="stat-sub">All columns</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Numeric Columns</div>
+          <div class="stat-value amber">{{ overview.numeric_columns }}</div>
+          <div class="stat-sub">Numeric data</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Categorical Columns</div>
+          <div class="stat-value purple">{{ overview.categorical_columns }}</div>
+          <div class="stat-sub">Categorical data</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Missing Values</div>
+          <div class="stat-value red">{{ "{:,}".format(overview.missing_values) }}</div>
+          <div class="stat-sub">Total missing cells</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-charts-3" style="margin-top:18px;">
+    <div class="card">
+      <div class="card-title">Preview (Top 5 Rows)</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>{% for col in preview.columns %}<th>{{ col }}</th>{% endfor %}</tr>
+          </thead>
+          <tbody>
+            {% for row in preview.rows %}
+            <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+        <span class="stat-sub">Showing top 5 of {{ "{:,}".format(overview.total_rows) }} rows</span>
+        <a href="{{ url_for('data_preview_page') }}" class="btn-primary" style="padding:7px 14px;font-size:12px;">View All Columns</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Column Data Types</div>
+      <img class="chart-img" src="{{ charts.donut }}" alt="Column data types">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Missing Values by Column <small><a href="{{ url_for('missing_values_page') }}" style="color:var(--blue);text-decoration:none;">View All</a></small></div>
+      <img class="chart-img" src="{{ charts.missing_bar }}" alt="Missing values by column">
+    </div>
+  </div>
+
+  <div class="grid grid-charts-3" style="margin-top:18px;">
+    <div class="card">
+      <div class="card-title">Numeric Columns Distribution</div>
+      <img class="chart-img" src="{{ charts.boxplot }}" alt="Numeric distribution boxplot">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Correlation Heatmap (Numeric Columns)</div>
+      <img class="chart-img" src="{{ charts.heatmap }}" alt="Correlation heatmap">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Categorical Columns Distribution</div>
+      <img class="chart-img" src="{{ charts.pie }}" alt="Categorical distribution">
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <div class="card-title">Summary Statistics (Numeric Columns)</div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Column</th><th>Count</th><th>Mean</th><th>Std Dev</th><th>Min</th>
+            <th>25%</th><th>50% (Median)</th><th>75%</th><th>Max</th><th>Missing</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in statistics %}
+          <tr>
+            <td><strong>{{ s.column }}</strong></td>
+            <td>{{ "{:,}".format(s.count) }}</td>
+            <td>{{ s.mean }}</td>
+            <td>{{ s.std }}</td>
+            <td>{{ s.min }}</td>
+            <td>{{ s.p25 }}</td>
+            <td>{{ s.median }}</td>
+            <td>{{ s.p75 }}</td>
+            <td>{{ s.max }}</td>
+            <td>{{ s.missing }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="10">No numeric columns found in this dataset.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tools-footer">
+    Built with
+    <i class="fa-solid fa-bolt" style="color:#000;"></i> Flask
+    <i class="fa-solid fa-table" style="color:#8b5cf6;margin-left:10px;"></i> Pandas
+    <i class="fa-solid fa-chart-simple" style="color:#ef4444;margin-left:10px;"></i> Matplotlib
+    <i class="fa-solid fa-water" style="color:#3b82f6;margin-left:10px;"></i> Seaborn
+    <i class="fa-solid fa-database" style="color:#0ea5e9;margin-left:10px;"></i> PostgreSQL
+  </div>
+
+{% endif %}
+{% endblock %}

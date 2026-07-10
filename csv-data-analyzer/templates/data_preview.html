@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Data Preview - CSV Data Analyzer{% endblock %}
+{% block header_title %}Data Preview{% endblock %}
+
+{% block content %}
+{% if not dataset %}
+  {% include "_upload_empty.html" %}
+{% else %}
+  <div class="card">
+    <div class="card-title">
+      Full Dataset
+      <small style="color:var(--text-muted);font-weight:500;">
+        {{ "{:,}".format(preview.total_rows) }} rows total
+      </small>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th>{% for col in preview.columns %}<th>{{ col }}</th>{% endfor %}</tr>
+        </thead>
+        <tbody>
+          {% for row in preview.rows %}
+          <tr>
+            <td>{{ (preview.page - 1) * preview.per_page + loop.index }}</td>
+            {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      {% if preview.page > 1 %}
+        <a href="{{ url_for('data_preview_page', page=1, per_page=preview.per_page) }}">&laquo; First</a>
+        <a href="{{ url_for('data_preview_page', page=preview.page-1, per_page=preview.per_page) }}">&lsaquo; Prev</a>
+      {% endif %}
+      <span class="current">Page {{ preview.page }} of {{ preview.total_pages }}</span>
+      {% if preview.page < preview.total_pages %}
+        <a href="{{ url_for('data_preview_page', page=preview.page+1, per_page=preview.per_page) }}">Next &rsaquo;</a>
+        <a href="{{ url_for('data_preview_page', page=preview.total_pages, per_page=preview.per_page) }}">Last &raquo;</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

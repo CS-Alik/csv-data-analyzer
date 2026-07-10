@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Correlations - CSV Data Analyzer{% endblock %}
+{% block header_title %}Correlations{% endblock %}
+
+{% block content %}
+{% if not dataset %}
+  {% include "_upload_empty.html" %}
+{% else %}
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">Correlation Heatmap (Numeric Columns)</div>
+      <img class="chart-img" src="{{ heatmap }}" alt="Correlation heatmap">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Strong Correlations (|r| &ge; 0.5)</div>
+      {% if strong_pairs %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Column A</th><th>Column B</th><th>Correlation</th></tr></thead>
+          <tbody>
+            {% for p in strong_pairs %}
+            <tr>
+              <td>{{ p.a }}</td>
+              <td>{{ p.b }}</td>
+              <td>
+                {% if p.value >= 0 %}
+                  <span class="badge badge-blue">{{ p.value }}</span>
+                {% else %}
+                  <span class="badge badge-red">{{ p.value }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="stat-sub">No strong correlations (|r| &ge; 0.5) found between numeric columns.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

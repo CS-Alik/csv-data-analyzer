@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}CSV Data Analyzer{% endblock %}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="fa-solid fa-chart-column"></i></div>
+      <div>
+        <div class="brand-title">CSV DATA ANALYZER</div>
+        <div class="brand-subtitle">Upload CSV file and get instant insights</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('overview') }}" class="nav-item {% if request.endpoint == 'overview' %}active{% endif %}">
+        <i class="fa-solid fa-house"></i> Overview
+      </a>
+      <a href="{{ url_for('columns_page') }}" class="nav-item {% if request.endpoint == 'columns_page' %}active{% endif %}">
+        <i class="fa-solid fa-table-columns"></i> Columns
+      </a>
+      <a href="{{ url_for('missing_values_page') }}" class="nav-item {% if request.endpoint == 'missing_values_page' %}active{% endif %}">
+        <i class="fa-solid fa-triangle-exclamation"></i> Missing Values
+      </a>
+      <a href="{{ url_for('statistics_page') }}" class="nav-item {% if request.endpoint == 'statistics_page' %}active{% endif %}">
+        <i class="fa-solid fa-square-poll-vertical"></i> Statistics
+      </a>
+      <a href="{{ url_for('correlations_page') }}" class="nav-item {% if request.endpoint == 'correlations_page' %}active{% endif %}">
+        <i class="fa-solid fa-diagram-project"></i> Correlations
+      </a>
+      <a href="{{ url_for('distributions_page') }}" class="nav-item {% if request.endpoint == 'distributions_page' %}active{% endif %}">
+        <i class="fa-solid fa-chart-line"></i> Distributions
+      </a>
+      <a href="{{ url_for('data_preview_page') }}" class="nav-item {% if request.endpoint == 'data_preview_page' %}active{% endif %}">
+        <i class="fa-solid fa-table-list"></i> Data Preview
+      </a>
+    </nav>
+
+    {% if recent %}
+    <div class="sidebar-section-label">Saved datasets</div>
+    <div class="saved-datasets">
+      {% for ds in recent %}
+      <a href="{{ url_for('switch_dataset', dataset_id=ds.id) }}"
+         class="saved-dataset-item {% if dataset and ds.id == dataset.id %}active{% endif %}"
+         title="Open '{{ ds.original_filename }}'">
+        <i class="fa-solid fa-file-csv"></i>
+        <div class="saved-dataset-info">
+          <div class="saved-dataset-name">{{ ds.original_filename }}</div>
+          <div class="saved-dataset-meta">{{ "%.1f"|format(ds.file_size_bytes / 1024 / 1024) }} MB · {{ ds.uploaded_at.strftime("%b %d") }}</div>
+        </div>
+        {% if dataset and ds.id == dataset.id %}
+        <i class="fa-solid fa-circle-check saved-dataset-check"></i>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if dataset %}
+    <div class="sidebar-dataset-card">
+      <div class="dataset-status"><i class="fa-solid fa-circle-check"></i> Dataset Loaded</div>
+      <div class="dataset-name">{{ dataset.original_filename }}</div>
+      <div class="dataset-meta">{{ "%.2f"|format(dataset.file_size_bytes / 1024 / 1024) }} MB</div>
+      <div class="dataset-meta">{{ dataset.uploaded_at.strftime("%b %d, %Y %I:%M %p") }}</div>
+      <a href="{{ url_for('reset_dataset') }}" class="dataset-remove" onclick="return confirm('Remove this dataset?');">
+        <i class="fa-solid fa-trash"></i> Remove
+      </a>
+    </div>
+    {% endif %}
+  </aside>
+
+  <main class="main-content">
+    <header class="top-header">
+      <div class="top-header-title">{% block header_title %}Overview{% endblock %}</div>
+      <div class="top-header-actions">
+        <a href="https://github.com/your-org/csv-data-analyzer" target="_blank" rel="noopener" class="btn-github">
+          <i class="fa-brands fa-github"></i> Open source
+        </a>
+        {% if dataset %}
+        <a href="{{ url_for('download_pdf') }}" class="btn-primary">
+          <i class="fa-solid fa-file-pdf"></i> Download as PDF
+        </a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="content-area">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">
+              <i class="fa-solid {% if category == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

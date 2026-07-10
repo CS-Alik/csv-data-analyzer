@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Statistics - CSV Data Analyzer{% endblock %}
+{% block header_title %}Statistics{% endblock %}
+
+{% block content %}
+{% if not dataset %}
+  {% include "_upload_empty.html" %}
+{% else %}
+  <div class="card">
+    <div class="card-title">Summary Statistics (Numeric Columns)</div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Column</th><th>Count</th><th>Mean</th><th>Std Dev</th><th>Min</th>
+            <th>25%</th><th>50% (Median)</th><th>75%</th><th>Max</th><th>Missing</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in statistics %}
+          <tr>
+            <td><strong>{{ s.column }}</strong></td>
+            <td>{{ "{:,}".format(s.count) }}</td>
+            <td>{{ s.mean }}</td>
+            <td>{{ s.std }}</td>
+            <td>{{ s.min }}</td>
+            <td>{{ s.p25 }}</td>
+            <td>{{ s.median }}</td>
+            <td>{{ s.p75 }}</td>
+            <td>{{ s.max }}</td>
+            <td>{{ s.missing }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="10">No numeric columns found in this dataset.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

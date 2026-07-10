@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Columns - CSV Data Analyzer{% endblock %}
+{% block header_title %}Columns{% endblock %}
+
+{% block content %}
+{% if not dataset %}
+  {% include "_upload_empty.html" %}
+{% else %}
+  <div class="grid grid-5" style="margin-bottom:18px;">
+    <div class="stat-card">
+      <div class="stat-label">Total Columns</div>
+      <div class="stat-value blue">{{ overview.total_columns }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Numeric</div>
+      <div class="stat-value amber">{{ overview.numeric_columns }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Categorical</div>
+      <div class="stat-value purple">{{ overview.categorical_columns }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Columns</div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Column Name</th><th>Type</th><th>Dtype</th>
+            <th>Missing</th><th>Missing %</th><th>Unique Values</th><th>Sample Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in columns %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>
+              {% if c.type == 'Numeric' %}
+                <span class="badge badge-blue">Numeric</span>
+              {% else %}
+                <span class="badge badge-green">Categorical</span>
+              {% endif %}
+            </td>
+            <td>{{ c.dtype }}</td>
+            <td>{{ c.missing }}</td>
+            <td>
+              {% if c.missing_pct > 20 %}
+                <span class="badge badge-red">{{ c.missing_pct }}%</span>
+              {% elif c.missing_pct > 0 %}
+                <span class="badge badge-amber">{{ c.missing_pct }}%</span>
+              {% else %}
+                <span class="badge badge-green">0%</span>
+              {% endif %}
+            </td>
+            <td>{{ c.unique }}</td>
+            <td>{{ c.sample }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

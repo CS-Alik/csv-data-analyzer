@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Missing Values - CSV Data Analyzer{% endblock %}
+{% block header_title %}Missing Values{% endblock %}
+
+{% block content %}
+{% if not dataset %}
+  {% include "_upload_empty.html" %}
+{% else %}
+  <div class="grid grid-3" style="margin-bottom:18px;">
+    <div class="stat-card">
+      <div class="stat-label">Total Missing Cells</div>
+      <div class="stat-value red">{{ "{:,}".format(missing.total_missing) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Cells</div>
+      <div class="stat-value blue">{{ "{:,}".format(missing.total_cells) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Overall Missing %</div>
+      <div class="stat-value amber">{{ missing.overall_pct }}%</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-title">Missing Values by Column</div>
+    <img class="chart-img" src="{{ chart }}" alt="Missing values chart">
+  </div>
+
+  <div class="card">
+    <div class="card-title">Missing Values Detail</div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Column</th><th>Missing Count</th><th>Missing %</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for m in missing.columns %}
+          <tr>
+            <td><strong>{{ m.column }}</strong></td>
+            <td>{{ "{:,}".format(m.missing_count) }}</td>
+            <td>{{ m.missing_pct }}%</td>
+            <td>
+              {% if m.missing_count == 0 %}
+                <span class="badge badge-green">Complete</span>
+              {% elif m.missing_pct > 20 %}
+                <span class="badge badge-red">High</span>
+              {% else %}
+                <span class="badge badge-amber">Some Missing</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
