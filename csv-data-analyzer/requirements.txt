@@ -8,3 +8,5 @@ seaborn==0.13.2
 reportlab==4.2.0
 python-dotenv==1.0.1
 Werkzeug==3.0.3
+pip install -r requirements.txt
+gunicorn app:app
